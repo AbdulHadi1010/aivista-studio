@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  # Frontend React app
+  frontend:
+    build: .
+    ports:
+      - "80:80"
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      - NODE_ENV=production
+
+  # Example backend service (adjust as needed for your AI backend)
+  backend:
+    # Replace with your actual backend image
+    image: node:18-alpine
+    ports:
+      - "3001:3001"
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+    # Uncomment and configure for your backend
+    # volumes:
+    #   - ./backend:/app
+    # working_dir: /app
+    # command: npm start
+    command: >
+      sh -c "
+        echo 'Backend placeholder - replace with your AI backend service';
+        echo 'Endpoints expected at /api/text and /api/image';
+        sleep infinity
+      "
+
+networks:
+  default:
+    driver: bridge
