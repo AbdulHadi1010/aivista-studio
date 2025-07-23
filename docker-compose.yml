@@ -12,27 +12,20 @@ services:
     environment:
       - NODE_ENV=production
 
-  # Example backend service (adjust as needed for your AI backend)
+  # FastAPI backend service
   backend:
-    # Replace with your actual backend image
-    image: node:18-alpine
+    build: ./backend
     ports:
       - "3001:3001"
     restart: unless-stopped
     environment:
-      - NODE_ENV=production
-      - PORT=3001
-    # Uncomment and configure for your backend
-    # volumes:
-    #   - ./backend:/app
-    # working_dir: /app
-    # command: npm start
-    command: >
-      sh -c "
-        echo 'Backend placeholder - replace with your AI backend service';
-        echo 'Endpoints expected at /api/text and /api/image';
-        sleep infinity
-      "
+      - PYTHONUNBUFFERED=1
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
 networks:
   default:
