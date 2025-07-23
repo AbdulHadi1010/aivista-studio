@@ -29,8 +29,8 @@ const TextChatPage = () => {
     setIsLoading(true);
 
     try {
-      // Simulate API call to /api/text
-      const response = await fetch('/api/text', {
+      // Placeholder URL for text generation API
+      const response = await fetch('https://api.example.com/text', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -53,7 +53,7 @@ const TextChatPage = () => {
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: 'assistant',
-        content: 'I\'m a demo response! Your message was: "' + inputValue + '". In a real app, this would connect to your AI backend.',
+        content: 'I\'m a demo response! Your message was: "' + inputValue + '". In a real app, this would connect to your AI backend at https://api.example.com/text',
         timestamp: new Date(),
       };
       

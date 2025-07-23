@@ -12,23 +12,11 @@ A lightweight, developer-focused frontend web application for AI text and image 
 
 ## Quick Start
 
-### Using Docker Compose (Recommended)
+### Using Docker
 
 ```bash
 # Build and start the application
 docker-compose up --build
-
-# Access the app at http://localhost
-```
-
-### Using Docker Only
-
-```bash
-# Build the image
-docker build -t devai-tools .
-
-# Run the container
-docker run -p 80:80 devai-tools
 
 # Access the app at http://localhost
 ```
@@ -57,42 +45,69 @@ npm run build
 npm run preview
 ```
 
-## Backend Integration
+## API Integration
 
-The app expects backend endpoints at:
+The app is configured to work with these placeholder endpoints that you can replace with your actual AI service URLs:
 
-- `POST /api/text` - Text generation
-  ```json
-  Request: { "message": "string" }
-  Response: { "response": "string" }
-  ```
+### Text Generation
+```bash
+# Replace https://api.example.com/text with your actual endpoint
+POST https://api.example.com/text
+Content-Type: application/json
+{
+  "message": "Your text prompt here"
+}
 
-- `POST /api/image` - Image generation
-  ```json
-  Request: { "prompt": "string" }
-  Response: { "image_url": "string" }
-  ```
+Response:
+{
+  "response": "Generated text response"
+}
+```
 
-### Configuring Backend
+### Image Generation
+```bash
+# Replace https://api.example.com/image with your actual endpoint
+POST https://api.example.com/image
+Content-Type: application/json
+{
+  "prompt": "Your image prompt here"
+}
 
-1. Update `nginx.conf` proxy_pass URL to point to your backend
-2. Modify `docker-compose.yml` backend service configuration
-3. Ensure backend serves on the expected endpoints
+Response:
+{
+  "image_url": "https://your-generated-image-url.com/image.jpg"
+}
+```
+
+## Customization
+
+### Update API URLs
+
+Replace the placeholder URLs in these files with your actual API endpoints:
+
+- **Text API**: `src/pages/TextChatPage.tsx` (line 33)
+- **Image API**: `src/pages/ImageGenPage.tsx` (line 21)
+
+### Example API Services
+
+You can integrate with services like:
+- OpenAI GPT API for text generation
+- DALL-E, Midjourney, or Stable Diffusion for images
+- Your own custom AI backends
 
 ## Architecture
 
 ```
-┌─────────────────┐    ┌─────────────────┐
-│   Frontend      │    │   Backend       │
-│   (React/TS)    │────│   (Your API)    │
-│   Port 80       │    │   Port 3001     │
-└─────────────────┘    └─────────────────┘
-        │
-        ▼
+┌─────────────────┐
+│   Frontend      │
+│   (React/TS)    │
+│   Port 80       │
+└─────────────────┘
+         │
+         ▼
 ┌─────────────────┐
 │   NGINX         │
 │   Static Files  │
-│   Proxy /api/*  │
 └─────────────────┘
 ```
 
@@ -103,7 +118,6 @@ The app expects backend endpoints at:
 - **Gzip compression**: Reduces bandwidth usage
 - **Caching headers**: Improves performance
 - **Security headers**: Basic security hardening
-- **Health checks**: Container monitoring support
 
 ## Technology Stack
 
@@ -130,33 +144,18 @@ src/
 
 Docker files:
 ├── Dockerfile             # Multi-stage build
-├── docker-compose.yml     # Full stack setup
+├── docker-compose.yml     # Frontend only setup
 ├── nginx.conf            # NGINX configuration
 └── .dockerignore         # Build optimization
 ```
-
-## Customization
-
-### Styling
-All styles are in `src/index.css` using CSS custom properties for easy theming.
-
-### Adding Features
-- Add new pages in `src/pages/`
-- Update routing in `src/App.tsx`
-- Add navigation links in `src/components/Navigation.tsx`
-
-### Backend Integration
-- Modify API endpoints in page components
-- Update proxy configuration in `nginx.conf`
-- Configure CORS if needed
 
 ## Deployment
 
 ### Production Deployment
 
-1. Configure your backend URLs
-2. Build and push Docker image
-3. Deploy using your preferred container orchestration
+1. Configure your API URLs in the frontend code
+2. Build and deploy the Docker container
+3. Configure your AI backend services separately
 
 ### Cloud Deployment Examples
 

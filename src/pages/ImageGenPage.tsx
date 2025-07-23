@@ -16,8 +16,8 @@ const ImageGenPage = () => {
     setGeneratedImage(null);
 
     try {
-      // Simulate API call to /api/image
-      const response = await fetch('/api/image', {
+      // Placeholder URL for image generation API
+      const response = await fetch('https://api.example.com/image', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -35,7 +35,7 @@ const ImageGenPage = () => {
     } catch (error) {
       // Fallback for demo purposes - use a placeholder image
       console.log('API call failed, using placeholder');
-      setError('API connection failed. Showing placeholder image for demo.');
+      setError('API connection failed. Replace https://api.example.com/image with your actual API endpoint.');
       // Using a placeholder image service for demo
       setGeneratedImage(`https://picsum.photos/512/512?random=${Date.now()}`);
     } finally {
