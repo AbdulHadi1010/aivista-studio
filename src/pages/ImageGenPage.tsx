@@ -15,28 +15,39 @@ const ImageGenPage = () => {
     setError(null);
     setGeneratedImage(null);
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3000000); // 30s timeout
+
     try {
-      // Placeholder URL for image generation API
-      const response = await fetch('https://api.example.com/image', {
+      const response = await fetch('http://52.66.219.240:3001/generate-image', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ prompt }),
+        signal: controller.signal,
       });
 
+      clearTimeout(timeoutId);
+
       const data = await response.json();
-      
+
       if (data.image_url) {
         setGeneratedImage(data.image_url);
       } else {
         throw new Error('No image URL received');
       }
-    } catch (error) {
-      // Fallback for demo purposes - use a placeholder image
-      console.log('API call failed, using placeholder');
-      setError('API connection failed. Replace https://api.example.com/image with your actual API endpoint.');
-      // Using a placeholder image service for demo
+    } catch (err: any) {
+      clearTimeout(timeoutId);
+
+      if (err.name === 'AbortError') {
+        setError('The request timed out after 30 seconds.');
+      } else {
+        console.log('API call failed, using placeholder');
+        setError('API connection failed. Replace https://api.example.com/image with your actual API endpoint.');
+      }
+
+      // Fallback placeholder
       setGeneratedImage(`https://picsum.photos/512/512?random=${Date.now()}`);
     } finally {
       setIsLoading(false);
@@ -63,9 +74,7 @@ const ImageGenPage = () => {
         <div className="image-container">
           <form onSubmit={handleSubmit}>
             <div className="form-group">
-              <label htmlFor="prompt" className="form-label">
-                Image Prompt
-              </label>
+              <label htmlFor="prompt" className="form-label">Image Prompt</label>
               <textarea
                 id="prompt"
                 value={prompt}
@@ -93,7 +102,6 @@ const ImageGenPage = () => {
                   'Generate Image'
                 )}
               </button>
-              
               {(generatedImage || error) && (
                 <button 
                   type="button" 
@@ -140,7 +148,6 @@ const ImageGenPage = () => {
                 alt={`Generated image: ${prompt}`}
                 className="generated-image"
                 onError={(e) => {
-                  // Fallback if image fails to load
                   const target = e.target as HTMLImageElement;
                   target.src = `https://via.placeholder.com/512x512/f3f4f6/6b7280?text=Image+Not+Found`;
                 }}
