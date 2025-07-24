@@ -17,50 +17,54 @@ const TextChatPage = () => {
     e.preventDefault();
     if (!inputValue.trim() || isLoading) return;
 
+    const currentInput = inputValue;
     const userMessage: Message = {
       id: Date.now().toString(),
       type: 'user',
-      content: inputValue,
+      content: currentInput,
       timestamp: new Date(),
     };
 
-    setMessages((prev) => [...prev, userMessage]);
+    setMessages(prev => [...prev, userMessage]);
     setInputValue('');
     setIsLoading(true);
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 3000000); // 30s timeout
 
     try {
       const response = await fetch('http://52.66.219.240:3001/generate', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ message: inputValue }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: currentInput }),
+        signal: controller.signal,
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-
+      clearTimeout(timeout);
       const data = await response.json();
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: 'assistant',
-        content: data?.response || 'Sorry, I couldn\'t process your request right now.',
+        content: data.response || 'Sorry, I couldn’t process your request.',
         timestamp: new Date(),
       };
 
-      setMessages((prev) => [...prev, assistantMessage]);
-    } catch (error) {
+      setMessages(prev => [...prev, assistantMessage]);
+    } catch (error: any) {
+      clearTimeout(timeout);
+
       const errorMessage: Message = {
-        id: (Date.now() + 2).toString(),
+        id: (Date.now() + 1).toString(),
         type: 'assistant',
-        content: `I’m a demo response! Your message was: "${inputValue}". In a real app, this would connect to your AI backend.`,
+        content:
+          error.name === 'AbortError'
+            ? 'The request timed out. Please try again.'
+            : `I'm a demo response! Your message was: "${currentInput}". In a real app, this would connect to your AI backend.`,
         timestamp: new Date(),
       };
 
-      setMessages((prev) => [...prev, errorMessage]);
-      console.error('Error calling text generation API:', error);
+      setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
     }
@@ -80,14 +84,7 @@ const TextChatPage = () => {
         <div className="chat-container">
           <div className="chat-messages">
             {messages.length === 0 ? (
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                height: '100%',
-                color: 'var(--text-muted)',
-                textAlign: 'center'
-              }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-muted)', textAlign: 'center' }}>
                 <div>
                   <div style={{ fontSize: '2rem', marginBottom: 'var(--spacing-md)' }}>💬</div>
                   <p>No messages yet. Start a conversation!</p>
