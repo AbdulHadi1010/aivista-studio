@@ -24,13 +24,12 @@ const TextChatPage = () => {
       timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setInputValue('');
     setIsLoading(true);
 
     try {
-      // Placeholder URL for text generation API
-      const response = await fetch('https://api.example.com/text', {
+      const response = await fetch('http://52.66.219.240:3001/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -38,26 +37,30 @@ const TextChatPage = () => {
         body: JSON.stringify({ message: inputValue }),
       });
 
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
       const data = await response.json();
-      
+
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: 'assistant',
-        content: data.response || 'Sorry, I couldn\'t process your request right now.',
+        content: data?.response || 'Sorry, I couldn\'t process your request right now.',
         timestamp: new Date(),
       };
 
-      setMessages(prev => [...prev, assistantMessage]);
+      setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
-      // Fallback response for demo purposes
       const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
+        id: (Date.now() + 2).toString(),
         type: 'assistant',
-        content: 'I\'m a demo response! Your message was: "' + inputValue + '". In a real app, this would connect to your AI backend at https://api.example.com/text',
+        content: `I’m a demo response! Your message was: "${inputValue}". In a real app, this would connect to your AI backend.`,
         timestamp: new Date(),
       };
-      
-      setMessages(prev => [...prev, errorMessage]);
+
+      setMessages((prev) => [...prev, errorMessage]);
+      console.error('Error calling text generation API:', error);
     } finally {
       setIsLoading(false);
     }
@@ -77,11 +80,11 @@ const TextChatPage = () => {
         <div className="chat-container">
           <div className="chat-messages">
             {messages.length === 0 ? (
-              <div style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
-                height: '100%', 
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: '100%',
                 color: 'var(--text-muted)',
                 textAlign: 'center'
               }}>
@@ -104,7 +107,7 @@ const TextChatPage = () => {
                 </div>
               ))
             )}
-            
+
             {isLoading && (
               <div className="message assistant">
                 <div>
@@ -131,8 +134,8 @@ const TextChatPage = () => {
                 disabled={isLoading}
                 style={{ flex: 1 }}
               />
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 className="btn btn-primary"
                 disabled={!inputValue.trim() || isLoading}
               >
