@@ -13,6 +13,14 @@ const TextChatPage = () => {
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  // Function to clean up AI response by removing thinking tags
+  const cleanAIResponse = (response: string): string => {
+    // Remove <think>...</think> tags and their content
+    return response
+      .replace(/<think>[\s\S]*?<\/think>/gi, '')
+      .trim();
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputValue.trim() || isLoading) return;
@@ -24,7 +32,7 @@ const TextChatPage = () => {
       content: currentInput,
       timestamp: new Date(),
     };
-
+    console.log("Fuck", currentInput);
     setMessages(prev => [...prev, userMessage]);
     setInputValue('');
     setIsLoading(true);
@@ -33,20 +41,28 @@ const TextChatPage = () => {
     const timeout = setTimeout(() => controller.abort(), 3000000); // 30s timeout
 
     try {
-      const response = await fetch('http://52.66.219.240:3001/generate', {
+      const response = await fetch('http://13.204.53.183:11434/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: currentInput }),
+        body: JSON.stringify({
+                model: "deepseek-r1:7b-qwen-distill-q4_K_M",
+                prompt: currentInput,
+                stream: false
+        }),
         signal: controller.signal,
       });
 
       clearTimeout(timeout);
       const data = await response.json();
+      console.log("My Precious!! ",data)
+
+      // Clean the AI response before displaying
+      const cleanedResponse = cleanAIResponse(data.response || '');
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: 'assistant',
-        content: data.response || 'Sorry, I couldn’t process your request.',
+        content: cleanedResponse || 'Sorry, I couldn\'t process your request.',
         timestamp: new Date(),
       };
 
